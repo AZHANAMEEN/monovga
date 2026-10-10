@@ -1,7 +1,1 @@
-
-void setup() {
-    main();
-}
-void loop() {
-
-}
+//just a include for opening in arduino ide

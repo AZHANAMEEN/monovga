@@ -22,4 +22,6 @@
 #define VISIBLE_END_LINE       515U      // 480 visible lines
 #define VESA_FRAME_LINES   525U
 #define VSYNC_PULSE_LINES  2U
+#define VISIBLE_START_LINE  35U
+#define VISIBLE_END_LINE    515U
 #endif
