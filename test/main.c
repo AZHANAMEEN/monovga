@@ -144,17 +144,15 @@ static const uint8_t dvd[DVD_H][DVD_W] = {
   {0,0,0,3,3,3,3,3,3,3,3,3,3,0,0,0}
 };
 /* ---------------- your code ---------------- */
-int old_x = 30;
-int old_y = 30;
 // Runs once, before the display starts.
 void setup(void) {
   clear_screen();
 }
-static int x=30, y=30, dx = 2, dy = 2;
+static int x=30, y=30, dx = 1, dy = 1, old_x = 30, old_y =30;
 // Runs once per frame (60 times a second), inside vertical blanking.
 // Keep it short: roughly 1000 pixel writes at most.
 void loop(void) {
-  clear_screen();
+  clear_rect(old_x, old_y, 16, 8);
   x += dx;
   y += dy;
   if (x < 0) {
@@ -176,7 +174,6 @@ void loop(void) {
   draw_sprite(&dvd[0][0], 16, 8, x, y);
   old_x = x;
   old_y = y;
-  delay_frames(2);
 }
 
 /* ---------------- startup ---------------- */
