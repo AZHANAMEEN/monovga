@@ -31,6 +31,10 @@ void setupcont(void) {
   pinMode(nesLatch, OUTPUT);
   digitalWrite(nesClock, LOW);
   digitalWrite(nesLatch, LOW);
+  u = true;
+  d = true;
+  l = true;
+  r = true;
 }
 
 void loopcont(void) {
