@@ -37,14 +37,14 @@ static const uint8_t apple[appleh][applew] PROGMEM = {
 #define MAX_SNAKE_LEN 30
 int px[MAX_SNAKE_LEN];
 int py[MAX_SNAKE_LEN];
-int snake_len = 3;  // Start with a length of 3
+int snake_len = 6;  // Start with a length of 3
 static int dirx, diry;
 int fx;
 int fy;
 int t = 0;
 int score = 0;  // or whatever your score formula is
 int fruit = 0;
-bool w=1,o=1,s=1,p=1;
+bool w = 1, o = 1, s = 1, p = 1;
 void fruitspawn(void) {
   if (fruit == 0) {
     bool collision;
@@ -80,86 +80,72 @@ void sneksetup(void) {
   draw_char_literal('G', 29 + 5, 4);
   draw_char_literal('A', 34 + 6, 4);
 }
+static int want_x = 1, want_y = 0;
+
+static void draw_score(void) {              // called only when the score changes
+  clear_rect(21, 100, 5, 8);  draw_char_literal('0' + (score / 100) % 10, 22, 100);
+  clear_rect(50, 100, 5, 8);  draw_char_literal('0' + (score / 10) % 10, 50, 100);
+  clear_rect(78, 100, 5, 8);  draw_char_literal('0' + score % 10, 78, 100);
+}
+
 void snakeinit(void) {
-    dirx = 1;
-    diry = 0;
-    snake_len = 3;
-    score = 0;
-    fruit = 0;
-    t = 0;
-
-    px[0] = 16;
-    py[0] = 36;
-
-    px[1] = 12;
-    py[1] = 36;
-
-    px[2] = 8;
-    py[2] = 36;
+  dirx = want_x = 1;
+  diry = want_y = 0;
+  snake_len = 12;
+  score = 0;
+  fruit = 0;
+  t = 0;
+  for (int i = 0; i < snake_len; i++) {      // head at x=48, body trailing left to x=4
+    px[i] = 48 - 4 * i;
+    py[i] = 36;
+  }
+  draw_sprite(&snek[0][0], snekw, snekh, px[0], py[0]);
+  for (int i = 1; i < snake_len; i++)
+    draw_sprite(&body[0][0], bodyw, bodyh, px[i], py[i]);
+  draw_score();
+  fruitspawn();
 }
 
 void snekloop(void) {
-  t += 1;
-  // Check if head is within bounds
-  if (t % 10 == 0) {
-    if (u == LOW && diry != 1) {
-      dirx = 0;
-      diry = -1;
-    } else if (d == LOW && diry != -1) {
-      dirx = 0;
-      diry = 1;
-    } else if (l == LOW && dirx != 1) {
-      dirx = -1;
-      diry = 0;
-    } else if (r == LOW && dirx != -1) {
-      dirx = 1;
-      diry = 0;
-    }
-    // 1. Clear ONLY the old tail position before shifting
-    clear_rect(px[snake_len - 1], py[snake_len - 1], bodyw, bodyh);
-    // 2. Shift body segments from tail to head
-    for (int i = snake_len - 1; i > 0; i--) {
-      px[i] = px[i - 1];
-      py[i] = py[i - 1];
-    }
-    // 3. Step the head forward by 4 pixels
-    px[0] += 4 * dirx;
-    py[0] += 4 * diry;
-  }
+  if      (u == LOW && diry != 1)  { want_x = 0;  want_y = -1; }   // read the pad every frame
+  else if (d == LOW && diry != -1) { want_x = 0;  want_y = 1;  }
+  else if (l == LOW && dirx != 1)  { want_x = -1; want_y = 0;  }
+  else if (r == LOW && dirx != -1) { want_x = 1;  want_y = 0;  }
 
-  // 4. Draw every frame: head + body segments
-  draw_sprite(&snek[0][0], snekw, snekh, px[0], py[0]);
+  if (++t < 10) return;                      // 9 frames in 10 do nothing
+  t = 0;
+  dirx = want_x;  diry = want_y;
 
-  for (int i = 1; i < snake_len; i++) {
-    draw_sprite(&body[0][0], bodyw, bodyh, px[i], py[i]);
-  }
+  int tx = px[snake_len - 1], ty = py[snake_len - 1];       // old tail cell
+  draw_sprite(&body[0][0], bodyw, bodyh, px[0], py[0]);     // old head becomes body
 
+  for (int i = snake_len - 1; i > 0; i--) { px[i] = px[i - 1]; py[i] = py[i - 1]; }
+  px[0] += 4 * dirx;
+  py[0] += 4 * diry;
 
-  // If head hits the apple
-  if (fx == px[0] && fy == py[0]) {
-    clear_rect(fx,fy,applew,appleh);
-    fruit = 0;
-    score += 1;
-    if (snake_len < 30) {
-      //snake_len++;  // Grow the snake
-    }
-  }
-
-
-  fruitspawn();
-  // Boundary check
-  if ((px[0] < 4) || ((px[0] + snekw) > 94) || (py[0] < 16) || ((py[0] + snekh) > 94)) {
+  if (px[0] < 4 || px[0] + snekw > 94 || py[0] < 16 || py[0] + snekh > 96) {   // wall
     clear_screen();
     sneksetup();
     snakeinit();
+    return;
   }
+
+  if (px[0] == fx && py[0] == fy) {          // ate the apple
+    clear_rect(fx, fy, applew, appleh);
+    fruit = 0;
+    score++;
+    if (snake_len < MAX_SNAKE_LEN) {         // grow: the old tail cell stays occupied
+      snake_len++;
+      px[snake_len - 1] = tx;
+      py[snake_len - 1] = ty;
+    } else {
+      clear_rect(tx, ty, bodyw, bodyh);
+    }
+    draw_score();
+  } else {
+    clear_rect(tx, ty, bodyw, bodyh);        // normal move: erase the old tail
+  }
+
+  draw_sprite(&snek[0][0], snekw, snekh, px[0], py[0]);     // new head
+  fruitspawn();                                             // draws only if a new apple is needed
 }
-//char d2 = '0' + ((score / 100) % 10);
-//char d1 = '0' + ((score / 10) % 10);
-//char d0 = '0' + (score % 10);
-//if (!(d2 == '0')) clear_rect(107, 25, 5, 8);
-//if (!(d1 == '0')) clear_rect(112 + 6, 25, 5, 8);
-//if (!(d0 == '0')) clear_rect(117 + 12, 25, 5, 8);
-//draw_char_literal(d2, 107, 25);
-//draw_char_literal(d1, 112 + 6, 25);
-//draw_char_literal(d0, 117 + 12, 25);

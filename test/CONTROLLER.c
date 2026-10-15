@@ -1,8 +1,8 @@
 #include "CONTROLLER.h"
 
-const int nesData  = PIN_PD6;
-const int nesClock = PIN_PD5;
-const int nesLatch = PIN_PD4;
+const int nesData  = PIN_PD2;
+const int nesClock = PIN_PD1;
+const int nesLatch = PIN_PD0;
 
 bool u = true;
 bool d = true;
@@ -26,7 +26,7 @@ byte readNesController() {
 }
 
 void setupcont(void) {
-  pinMode(nesData, INPUT);
+  pinMode(nesData, INPUT_PULLUP);
   pinMode(nesClock, OUTPUT);
   pinMode(nesLatch, OUTPUT);
   digitalWrite(nesClock, LOW);
