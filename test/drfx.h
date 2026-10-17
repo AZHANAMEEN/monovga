@@ -1,12 +1,15 @@
 #ifndef DRFX_H
 #define DRFX_H
-
+extern volatile int offset_x;
 #include <stdint.h>
 
 /* ---------------- screen settings ---------------- */
-#define ROW_BYTES 25            // 4 pixels per byte
-#define PIXELS (ROW_BYTES * 4)  // 160 columns
-#define ROWS 120                // each row is shown on 4 lines
+// If a specific game header hasn't defined these yet, use these defaults:
+#define ROW_BYTES 40            // Default (e.g., Snake: 30 * 4 = 120 cols)
+#define ROWS 120                // Default rows
+#define PIXELS (ROW_BYTES * 4)  // Computed automatically
+
+
 
 extern uint8_t fb[ROWS][ROW_BYTES];
 

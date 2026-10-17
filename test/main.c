@@ -11,10 +11,10 @@
 #include <avr/pgmspace.h>
 #include "CONTROLLER.h"
 #include "drfx.h"   // fb, ROW_BYTES, PIXELS, ROWS, drawing functions
-#include "snake.h"  // sneksetup(), snakeinit(), snekloop()
-
+#include "snake.h"  // sneksetup(), snekloop()
+#include "applicationhandler.h"
 /* ---------------- screen settings ---------------- */
-#define BACKPORCH_DELAY 230     // tune for horizontal position
+#define BACKPORCH_DELAY 142     // tune for horizontal position
 
 volatile uint8_t vblank_start;  // set by the ISR once per frame
 
@@ -28,9 +28,10 @@ volatile uint8_t vblank_start;  // set by the ISR once per frame
 #define PIX40 PIX8 PIX8 PIX8 PIX8 PIX8  // 10 bytes
 #define PIX160 PIX40 PIX40 PIX40 PIX40  // 40 bytes
 #define PIX100 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 //100BYTES
+#define PIX120 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 PIX4 //120BYTES
 static inline void burst(const uint8_t *row) {
   asm volatile(
-    PIX100
+    PIX160
     "out %[p], r1\n"  // blank (r1 = 0 in avr-gcc)
     : "+x"(row)
     : [p] "I"(_SFR_IO_ADDR(VPORTC_OUT))
@@ -56,23 +57,19 @@ static void wait_vblank(void) {
 static void delay_frames(uint8_t n) {
   while (n--) wait_vblank();
 }
-
 /* ---------------- your code ---------------- */
+
 // Runs once, before the display starts.
 void setup(void) {
   clear_screen();
   setupcont();
-  sneksetup();
-  snakeinit();
-  srand(TCB0.CNT);
-  
+  switchsetup();
 }
-
 // Runs once per frame (60 times a second), inside vertical blanking.
 // Keep it short: roughly 1000 pixel writes at most.
 void loop(void) {
   loopcont();
-  snekloop();
+  updateScreen();
 }
 /* ---------------- startup ---------------- */
 int main(void) {

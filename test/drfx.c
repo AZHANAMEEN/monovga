@@ -10,14 +10,16 @@ uint8_t fb[ROWS][ROW_BYTES];
 /* ---------------- drawing functions ---------------- */
 
 // Set one pixel (level 0-3) at any position. Off-screen is ignored.
-void set_pixel(int16_t x, int16_t y, uint8_t level) {
+void set_pixel(int16_t u, int16_t y, uint8_t level) {
+  int x = u + offset_x;
   if (x < 0 || x >= PIXELS || y < 0 || y >= ROWS) return;
   uint8_t sh = (x & 3) << 1;
   uint8_t *p = &fb[y][x >> 2];
   *p = (*p & ~(3 << sh)) | ((level & 3) << sh);
 }
 
-void draw_sprite(const uint8_t *m, uint8_t w, uint8_t h, int16_t x, int16_t y) {
+void draw_sprite(const uint8_t *m, uint8_t w, uint8_t h, int16_t u, int16_t y) {
+  int x = u + offset_x;
   for (uint8_t j = 0; j < h; j++) {
     int16_t py = y + j;
     if (py < 0 || py >= ROWS) continue;
@@ -41,7 +43,8 @@ void draw_sprite(const uint8_t *m, uint8_t w, uint8_t h, int16_t x, int16_t y) {
 
 // Fast black fill of a rectangle, used to erase a sprite before moving it.
 // It works in whole bytes, so it can also blank up to 3 pixels beside the area.
-void clear_rect(int16_t x, int16_t y, uint8_t w, uint8_t h) {
+void clear_rect(int16_t u, int16_t y, uint8_t w, uint8_t h) {
+  int x = u + offset_x;
   int16_t x0 = x >> 2, x1 = (x + w - 1) >> 2;
   if (x0 < 0) x0 = 0;
   if (x1 > ROW_BYTES - 1) x1 = ROW_BYTES - 1;
@@ -57,6 +60,7 @@ void clear_screen(void) {
   memset(fb, 0, sizeof fb);
 }
 void circle(int16_t cx, int16_t cy, int16_t r, uint8_t level) {
+  
   int16_t x = r, y = 0, err = 1 - r;
   while (x >= y) {
     set_pixel(cx + x, cy + y, level);
@@ -99,7 +103,6 @@ void draw_char_literal(char c, int x, int y) {
   int ind = -1;
   if (c >= 'A' && c <= 'Z') ind = c - 'A';
   else if (c >= '0' && c <= '9') ind = (c - '0') + 26;
-
   draw_char(ind, x, y, 3);
 }
 

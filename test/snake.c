@@ -5,7 +5,6 @@
 #include "drfx.h"
 #include "snake.h"
 #include "CONTROLLER.h"
-
 /* ---------------- your sprites ---------------- */
 #define snekh 4
 #define snekw 4
@@ -67,6 +66,7 @@ void fruitspawn(void) {
   }
 }
 void sneksetup(void) {
+  offset_x = 30;
   //mainborder
   drawbox(0, 0, 99, 120, 2, 3);
   //gameborder
@@ -79,6 +79,7 @@ void sneksetup(void) {
   draw_char_literal('V', 24 + 4, 4);
   draw_char_literal('G', 29 + 5, 4);
   draw_char_literal('A', 34 + 6, 4);
+  snakeinit();
 }
 static int want_x = 1, want_y = 0;
 
