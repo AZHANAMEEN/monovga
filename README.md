@@ -43,6 +43,18 @@ A sprite is `const uint8_t name[h][w]` with values 0-3. Included: `smiley` (8×8
 draw_sprite(&dvd[0][0], DVD_W, DVD_H, x, y);
 ```
 
+
+# Application handler
+
+The test program uses an application handler to manage screen states and transitions. The `ScreenState` enum in `test/applicationhandler.h` identifies the active state.
+
+- `switchsetup()` clears the framebuffer and runs setup for the active state. It runs at startup and when the state changes.
+- `stateTick()` detects state changes and invokes `switchsetup()` once for each new state. The main loop calls it once per frame.
+- `updateScreen()` dispatches each frame to the active state's update routine. State changes take effect on the next state tick.
+- On the home screen, the handler draws the selection interface and uses controller input to move the cursor and select a state. The X button returns to the home screen from other states.
+- The handler coordinates screen setup, updates, and transitions; screen-specific behavior is kept in its corresponding module.
+
+
 ## Settings
 
 | Name | Value | Meaning |
