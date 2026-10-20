@@ -10,6 +10,8 @@ bool l = true;
 bool r = true;
 bool a = true;
 bool b = true;
+bool x = true;
+bool y = true;
 
 byte readNesController() {
   byte tempData = 255;
@@ -35,6 +37,8 @@ void setupcont(void) {
   d = true;
   l = true;
   r = true;
+  x = true;
+  y = true;
 }
 
 void loopcont(void) {
@@ -45,4 +49,6 @@ void loopcont(void) {
   d = (bitRead(nesRegister, 5) == 1);
   l = (bitRead(nesRegister, 6) == 1);
   r = (bitRead(nesRegister, 7) == 1);
+  x = (bitRead(nesRegister, 2) == 1);
+  y = (bitRead(nesRegister, 3) == 1);
 }

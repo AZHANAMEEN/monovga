@@ -14,7 +14,7 @@
 #include "snake.h"  // sneksetup(), snekloop()
 #include "applicationhandler.h"
 /* ---------------- screen settings ---------------- */
-#define BACKPORCH_DELAY 142     // tune for horizontal position
+#define BACKPORCH_DELAY 141     // tune for horizontal position
 
 volatile uint8_t vblank_start;  // set by the ISR once per frame
 
@@ -69,6 +69,7 @@ void setup(void) {
 // Keep it short: roughly 1000 pixel writes at most.
 void loop(void) {
   loopcont();
+  stateTick();
   updateScreen();
 }
 /* ---------------- startup ---------------- */

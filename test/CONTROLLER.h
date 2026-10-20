@@ -7,6 +7,8 @@ extern bool u;
 extern bool d;
 extern bool l;
 extern bool r;
+extern bool x;
+extern bool y;
 extern bool a;
 extern bool b;
 

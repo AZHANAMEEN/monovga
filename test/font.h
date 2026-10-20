@@ -9,7 +9,7 @@
 // 3x5 Font Bitmaps (3 wide, 5 high) 
 // Inverted: Background = 3, Active character pixels = 0
 // Includes letters A-Z and numbers 0-9
-const uint8_t font_3x5_inv[36][5][3] PROGMEM = {
+extern const uint8_t font_3x5_inv[36][5][3] PROGMEM = {
     // A
     { {3,0,3}, {0,3,0}, {0,0,0}, {0,3,0}, {0,3,0} },
     // B
@@ -85,7 +85,7 @@ const uint8_t font_3x5_inv[36][5][3] PROGMEM = {
     // 9
     { {0,0,0}, {0,3,0}, {0,0,0}, {3,3,0}, {0,0,0} }
 };
-const uint8_t font_3x5[36][5][3] PROGMEM = {
+extern const uint8_t font3x5[36][5][3] PROGMEM = {
     // A
     { {0,3,0}, {3,0,3}, {3,3,3}, {3,0,3}, {3,0,3} },
     // B

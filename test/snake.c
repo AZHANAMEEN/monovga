@@ -88,7 +88,11 @@ static void draw_score(void) {              // called only when the score change
   clear_rect(50, 100, 5, 8);  draw_char_literal('0' + (score / 10) % 10, 50, 100);
   clear_rect(78, 100, 5, 8);  draw_char_literal('0' + score % 10, 78, 100);
 }
-
+static bool hit_self(void) {
+  for (int i = 1; i < snake_len; i++)
+    if (px[0] == px[i] && py[0] == py[i]) return true;
+  return false;
+}
 void snakeinit(void) {
   dirx = want_x = 1;
   diry = want_y = 0;
@@ -124,7 +128,7 @@ void snekloop(void) {
   px[0] += 4 * dirx;
   py[0] += 4 * diry;
 
-  if (px[0] < 4 || px[0] + snekw > 94 || py[0] < 16 || py[0] + snekh > 96) {   // wall
+  if (px[0] < 4 || px[0] + snekw > 94 || py[0] < 16 || py[0] + snekh > 96 || hit_self()) {   // wall
     clear_screen();
     sneksetup();
     snakeinit();

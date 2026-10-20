@@ -41,21 +41,33 @@ void draw_sprite(const uint8_t *m, uint8_t w, uint8_t h, int16_t u, int16_t y) {
   }
 }
 
-// Fast black fill of a rectangle, used to erase a sprite before moving it.
-// It works in whole bytes, so it can also blank up to 3 pixels beside the area.
-void clear_rect(int16_t u, int16_t y, uint8_t w, uint8_t h) {
-  int x = u + offset_x;
-  int16_t x0 = x >> 2, x1 = (x + w - 1) >> 2;
-  if (x0 < 0) x0 = 0;
-  if (x1 > ROW_BYTES - 1) x1 = ROW_BYTES - 1;
-  if (x0 > x1) return;
-  for (uint8_t j = 0; j < h; j++) {
-    int16_t py = y + j;
-    if (py < 0 || py >= ROWS) continue;
-    memset(&fb[py][x0], 0, x1 - x0 + 1);
+// Pixel-exact filled rectangle, any level (0 = erase). Honours offset_x like the other draw functions.
+void fill_rect(int16_t u, int16_t y, uint8_t w, uint8_t h, uint8_t level) {
+  int16_t x  = u + offset_x;
+  int16_t x1 = x + w, y1 = y + h;                  // exclusive ends
+  if (x < 0) x = 0;
+  if (y < 0) y = 0;
+  if (x1 > PIXELS) x1 = PIXELS;
+  if (y1 > ROWS)   y1 = ROWS;
+  if (x >= x1 || y >= y1) return;
+
+  uint8_t pat = (level & 3) * 0x55;
+  uint8_t xb0 = x >> 2, xb1 = (x1 - 1) >> 2;
+  uint8_t lm  = 0xFF << ((x & 3) << 1);
+  uint8_t rm  = 0xFF >> ((3 - ((x1 - 1) & 3)) << 1);
+
+  for (int16_t j = y; j < y1; j++) {
+    uint8_t *row = fb[j];
+    if (xb0 == xb1) {
+      uint8_t m = lm & rm;
+      row[xb0] = (row[xb0] & ~m) | (pat & m);
+    } else {
+      row[xb0] = (row[xb0] & ~lm) | (pat & lm);
+      if (xb1 - xb0 > 1) memset(&row[xb0 + 1], pat, xb1 - xb0 - 1);
+      row[xb1] = (row[xb1] & ~rm) | (pat & rm);
+    }
   }
 }
-
 void clear_screen(void) {
   memset(fb, 0, sizeof fb);
 }
@@ -105,7 +117,18 @@ void draw_char_literal(char c, int x, int y) {
   else if (c >= '0' && c <= '9') ind = (c - '0') + 26;
   draw_char(ind, x, y, 3);
 }
-
+void drawsm_char(int ind, int x, int y, uint8_t color) {
+  if (ind < 0 || ind > 35) return;
+  // Pass the pointer to the specific character matrix directly to your draw_sprite function
+  // (Assuming draw_sprite is declared/available globally or via header)
+  draw_sprite((const uint8_t *)&font3x5[ind], 5, 8, x, y);
+}
+void drawsm_char_literal(char c, int x, int y) {
+  int ind = -1;
+  if (c >= 'A' && c <= 'Z') ind = c - 'A';
+  else if (c >= '0' && c <= '9') ind = (c - '0') + 26;
+  drawsm_char(ind, x, y, 3);
+}
 /* ---------------- sprites ---------------- */
 
 static const uint8_t smiley[8][8] PROGMEM = {

@@ -4,5 +4,4 @@
 void sneksetup(void);
 void snakeinit(void);
 void snekloop(void);
-
 #endif
